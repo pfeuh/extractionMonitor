@@ -38,29 +38,38 @@ void TACHY_countRoutine()
 void TACHY::compute()
 {
     unsigned long int new_pulses;
-    
+
+    // waiting lock
     while(1)
     {
+        // as frequency is on several bytes, an interrupt can
+        // corrupt it, we have to use a locker
         TACHY_locker = UNLOCKED;
         new_pulses = TACHY_pulses;
         if(TACHY_locker == UNLOCKED)
+            // no interrupt since last lock,
+            // frequency is OK
             break;
-        else
-            Serial.write('.');
     }
+    // computing pulses
     pulses = new_pulses - totalPulses;
     totalPulses = new_pulses;
     
-    speed = (float)pulses / (float)TACHY_PULSE_PER_ROTATE;
-    rate = ((speed - min) / (max - min)) * 100.0;
+    // computing speed
+    speed = ((float)pulses  / ((float)pulsePerRotate * (float)measurementWindow)) * 60.0;
     
-}
-
-void TACHY::updateOutput()
-{
-    Serial.print(speed, TACHY_DIGITS_AFTER_DOT);
-    Serial.write(' ');
-    Serial.println(rate, TACHY_DIGITS_AFTER_DOT);
+    // computing clogging
+    clogging = ((speed - min) / (max - min)) * 100.0;
+    if(clogging > 100.0)
+        clogging = 100.0;
+    else if(clogging < 0.0)
+        clogging = 0.0;
+    
+    // computing min & max values
+    if(lowestValue > speed)
+        lowestValue = speed;
+    else if(highestValue < speed)
+        highestValue = speed;
 }
 
 /******************/
@@ -77,9 +86,12 @@ void TACHY::begin()
     TACHY_pulses = 0;
     totalPulses = 0;
     TACHY_locker = UNLOCKED;
+    pulsePerRotate = TACHY_FACTORY_PULSE_PER_ROTATE;
     min = TACHY_FACTORY_MIN;
     max = TACHY_FACTORY_MAX;
-    milestone = millis() + TACHY_CYCLE_DURATION_MSEC;
+    lowestValue = max;
+    highestValue= min;
+    milestone += getMeasurementWindow() * 1000;
     
     pinMode(isrPin, INPUT_PULLUP);
     attachInterrupt(digitalPinToInterrupt(isrPin), TACHY_countRoutine, CHANGE);
@@ -89,18 +101,19 @@ void TACHY::sequencer()
 {
     if(millis() >= milestone)
     {
-        milestone = millis() + TACHY_CYCLE_DURATION_MSEC;
+        milestone += getMeasurementWindow() * 1000;
         compute();
-        updateOutput();
     }
 }
 
 void TACHY::calibrateLow()
 {
+    min = speed;
 }
 
 void TACHY::calibrateHi()
 {
+    max = speed;
 }
 
 float TACHY::getMin()
@@ -116,18 +129,51 @@ float TACHY::getMax()
 void TACHY::setMin(float value)
 {
     min = value;
-    Serial.print(F("new min is "));
-    Serial.println(min, TACHY_DIGITS_AFTER_DOT);
 }
 
 void TACHY::setMax(float value)
 {
     max = value;
-    Serial.print(F("new max is "));
-    Serial.println(max, TACHY_DIGITS_AFTER_DOT);
 }
 
 float TACHY::getSpeed()
 {
     return speed;
 }
+
+void TACHY::setPulsePerRotate(word value)
+{
+    pulsePerRotate = value;
+}
+
+word TACHY::getPulsePerRotate()
+{
+    return pulsePerRotate;
+}
+
+float TACHY::getLowestValue()
+{
+    return lowestValue;
+}
+
+float TACHY::getHighestValue()
+{
+    return highestValue;
+}
+
+float TACHY::getClogging()
+{
+    return clogging;
+}
+
+void TACHY::setMeasurementWindow(byte value)
+{
+    measurementWindow = value;
+}
+
+byte TACHY::getMeasurementWindow()
+{
+    return measurementWindow;
+}
+
+

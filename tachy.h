@@ -24,13 +24,14 @@
 
 #define TACHY_VERSION "1.00"
 
-#define TACHY_FACTORY_MIN 10
+#define TACHY_FACTORY_MIN 0
 #define TACHY_FACTORY_MAX 100
+#define TACHY_FACTORY_PULSE_PER_ROTATE 2
+#define TACHY_FACTORY_MEASUREMENT_WINDOW_SEC 1
 
 #define TACHY_DIGITS_AFTER_DOT 2
 
-#define TACHY_CYCLE_DURATION_MSEC 1000
-#define TACHY_PULSE_PER_ROTATE 2
+//~ #define TACHY_CYCLE_DURATION_MSEC 1000
 
 class TACHY
 {
@@ -45,19 +46,29 @@ class TACHY
         void setMin(float value);
         void setMax(float value);
         float getSpeed();
+        void setPulsePerRotate(word value);
+        word getPulsePerRotate();
+        float getLowestValue();
+        float getHighestValue();
+        float getClogging();
+        void setMeasurementWindow(byte value);
+        byte getMeasurementWindow();
 
     private:
         int isrPin;
-        word pulses;
         float speed;
         float min;
         float max;
-        float rate;
+        float lowestValue;
+        float highestValue;
+        word pulsePerRotate;
+        float clogging;
+        word pulses;
         unsigned long int totalPulses;
         unsigned long int milestone;
+        byte measurementWindow;
     
         void compute();
-        void updateOutput();
     
 };
 

@@ -21,9 +21,12 @@
 #include <EEPROM.h>
 #define EEPROM_ADDR_MIN 0
 #define EEPROM_ADDR_MAX (EEPROM_ADDR_MIN + sizeof(float))
-#define EEPROM_ADDR_PULSEPERROTATE (EEPROM_ADDR_MAX + sizeof(float))
-#define EEPROM_ADDR_MEASUREMENT_WINDOW (EEPROM_ADDR_PULSEPERROTATE + sizeof(float))
-#define EEPROM_DATASIZE (EEPROM_ADDR_MEASUREMENT_WINDOW + sizeof(byte))
+#define EEPROM_ADDR_PULSE_PER_ROTATE (EEPROM_ADDR_MAX + sizeof(float))
+#define EEPROM_ADDR_MEASUREMENT_WINDOW (EEPROM_ADDR_PULSE_PER_ROTATE + sizeof(float))
+#define EEPROM_ADDR_DURATION_MIN (EEPROM_ADDR_MEASUREMENT_WINDOW + sizeof(float))
+#define EEPROM_ADDR_DURATION_MAX (EEPROM_ADDR_DURATION_MIN + sizeof(float))
+#define EEPROM_ADDR_LUMINOSITY (EEPROM_ADDR_DURATION_MAX + sizeof(float))
+#define EEPROM_DATASIZE (EEPROM_ADDR_LUMINOSITY + sizeof(byte))
 
 #include "tachy.h"
 #define TACHY_PIN 3
@@ -38,7 +41,11 @@ K2000 k2000 = K2000();
 #define RGB_LEDS_PIN 4
 #define NB_RGB_LEDS 8
 Adafruit_NeoPixel rgbLeds = Adafruit_NeoPixel(NB_RGB_LEDS, RGB_LEDS_PIN, NEO_GBRW + NEO_KHZ800);
-//~ #define DEAD_HORSE_VALUE_SEC (1000 / NB_RGB_LEDS)
+
+#include <arduinoMenu.h>
+#include "menuData.h"
+#include "sharedFunctions.h"
+ARDUINO_MENU menu = ARDUINO_MENU();
 
 const char PROGMEM title[] = "Extraction monitor v. " TACHY_VERSION;
 const char PROGMEM timestamp[] = __DATE__ " " __TIME__;
@@ -50,12 +57,15 @@ unsigned long int milestone;
 #define console Serial
 
 // serial commands:
+// '*' + [1:65535] set k2000 max duration
+// '/' + [1:65535] set k2000 min duration
 // '+' + [1:65535] set 100% value
 // '-' + [1:65535] set 0% value
-// 'p' + [1:65535] set points per rotate
-// 'w' + [1:65]   set measurement window width in seconds
-// 'l'             low point 0% is current value
-// 'h'             hi point 100% is current value
+// 'p' + [1:65535] set pulses per rotate
+// 'w' + [1:65]    set measurement window width in seconds
+// 'i' + [1:255]   set led intensity (luminosity)
+// 'l'             put current rate to low point 0%
+// 'h'             put current rate to hi point 100%
 // 'r'             read eeprom config
 // 's'             store eeprom config
 // '?'             view config
@@ -70,6 +80,27 @@ void println_P(const char* address)
 {
     print_P(address);
     console.write('\n');
+}
+
+void printMaxCloggingDuration()
+{
+    console.print(F("max clogging set to "));
+    console.print(k2000.getDurationMax());
+    console.print(" msec\n");
+}
+
+void printMinCloggingDuration()
+{
+    console.print(F("min clogging set to "));
+    console.print(k2000.getDurationMin());
+    console.print(" msec\n");
+}
+
+void printLuminosity()
+{
+    console.print(F("luminosity set to "));
+    console.print(k2000.getDurationMin());
+    console.print("/255\n");
 }
 
 void printMax()
@@ -120,6 +151,8 @@ void printConfig()
     printMax();
     printPulsePerRotate();
     printMeasurementWindow();
+    printMaxCloggingDuration();
+    printMinCloggingDuration();
 }
 
 void ihmSequencer()
@@ -134,16 +167,28 @@ void ihmSequencer()
         //~ console.write(']');
         //~ console.write(' ');
         
-        console.print(tachy.getClogging());
+        console.print(tachy.getRate());
         console.print("% ");
         console.print(tachy.getSpeed());
         console.print(" rpm\n");
 
-        //~ console.print(tachy.getClogging());
+        //~ console.print(tachy.getRate());
         //~ console.print(F("\n"));
 
         
     }
+}
+
+void setMaxCloggingDuration(float value)
+{
+    k2000.setDurationMax(value);
+    printMaxCloggingDuration();
+}
+
+void setMinCloggingDuration(float value)
+{
+    k2000.setDurationMin(value);
+    printMinCloggingDuration();
 }
 
 void setMax(float value)
@@ -182,21 +227,33 @@ void calibrateHi()
     printCalibrateHi();
 }
 
+void setLuminosity(byte value)
+{
+    k2000.setLuminosity(value);
+    printLuminosity();
+}
+
 void readConfig()
 {
     float min;
     float max;
     word ppr;
     byte measurementWindow;
+    float dmin;
+    float dmax;
     EEPROM.get(EEPROM_ADDR_MIN, min);
     EEPROM.get(EEPROM_ADDR_MAX, max);
-    EEPROM.get(EEPROM_ADDR_PULSEPERROTATE, ppr);
+    EEPROM.get(EEPROM_ADDR_PULSE_PER_ROTATE, ppr);
     EEPROM.get(EEPROM_ADDR_MEASUREMENT_WINDOW, measurementWindow);
-    setMin(min);
-    setMax(max);
-    setPulsePerRotate(ppr);
-    setMeasurementWindow(measurementWindow);
-    printConfig();
+    EEPROM.get(EEPROM_ADDR_DURATION_MIN, dmin);
+    EEPROM.get(EEPROM_ADDR_DURATION_MAX, dmax);
+    tachy.setMin(min);
+    tachy.setMax(max);
+    tachy.setPulsePerRotate(ppr);
+    tachy.setMeasurementWindow(measurementWindow);
+    k2000.setDurationMin(dmin);
+    k2000.setDurationMax(dmax);
+    //~ printConfig();
     console.print(F("Configuration read!\n"));
 }
 
@@ -204,8 +261,10 @@ void storeConfig()
 {
     EEPROM.put(EEPROM_ADDR_MIN, tachy.getMin());
     EEPROM.put(EEPROM_ADDR_MAX, tachy.getMax());
-    EEPROM.put(EEPROM_ADDR_PULSEPERROTATE, tachy.getPulsePerRotate());
+    EEPROM.put(EEPROM_ADDR_PULSE_PER_ROTATE, tachy.getPulsePerRotate());
     EEPROM.put(EEPROM_ADDR_MEASUREMENT_WINDOW, tachy.getMeasurementWindow());
+    EEPROM.put(EEPROM_ADDR_DURATION_MIN, k2000.getDurationMin());
+    EEPROM.put(EEPROM_ADDR_DURATION_MAX, k2000.getDurationMax());
     printConfig();
     console.print(F("Configuration stored\n"));
 }
@@ -214,11 +273,20 @@ void executeCommand()
 {
     switch(userCommand)
     {
+        case '*':
+            setMaxCloggingDuration(userValue);
+            break;
+        case '/':
+            setMinCloggingDuration(userValue);
+            break;
+        case 'i':
+            setLuminosity(userValue);
+            break;
         case '+':
-            setMax((float)userValue);
+            setMax(userValue);
             break;
         case '-':
-            setMin((float)userValue);
+            setMin(userValue);
             break;
         case 'p':
             setPulsePerRotate(userValue);
@@ -269,6 +337,9 @@ void userSequencer()
             case '9':
                 userValue = userValue * 10 + c - '0';
                 break;
+            case '*':
+            case '/':
+            case 'i':
             case '+':
             case '-':
             case 'p':
@@ -291,13 +362,49 @@ void userSequencer()
 
 float getRate()
 {
-    return tachy.getClogging();
+    return tachy.getRate();
 }
 
 void ledCommand(byte led_num, unsigned long int _color)
 {
     rgbLeds.setPixelColor(led_num, _color);
     rgbLeds.show();
+}
+
+void editPulsesPerRotate(byte direction)
+{
+    if(direction == MENU_BROWSER_DATA_INCREASE)
+        tachy.setPulsePerRotate(tachy.getPulsePerRotate() + 1.0);
+    else if(direction == MENU_BROWSER_DATA_DECREASE)
+        tachy.setPulsePerRotate(tachy.getPulsePerRotate() - 1.0);
+    menu.printVariable((int)tachy.getPulsePerRotate());
+}
+
+void editMeasurementWindow(byte direction)
+{
+    if(direction == MENU_BROWSER_DATA_INCREASE)
+        tachy.setMeasurementWindow(tachy.getMeasurementWindow() + 1.0);
+    else if(direction == MENU_BROWSER_DATA_DECREASE)
+        tachy.setMeasurementWindow(tachy.getMeasurementWindow() - 1.0);
+    menu.printVariable(tachy.getMeasurementWindow());
+}
+
+void editMinSpeed(byte direction)
+{
+    if(direction == MENU_BROWSER_DATA_INCREASE)
+        tachy.setMin(tachy.getMin() + 1.0);
+    else if(direction == MENU_BROWSER_DATA_DECREASE)
+        tachy.setMin(tachy.getMin() - 1.0);
+    menu.printVariable(tachy.getMin());
+}
+
+void editMaxSpeed(byte direction)
+{
+    if(direction == MENU_BROWSER_DATA_INCREASE)
+        tachy.setMax(tachy.getMax() + 1.0);
+    else if(direction == MENU_BROWSER_DATA_DECREASE)
+        tachy.setMax(tachy.getMax() - 1.0);
+    menu.printVariable(tachy.getMax());
 }
 
 void setup()
@@ -313,21 +420,11 @@ void setup()
     
     rgbLeds.begin();
     
-    //~ // let the fan getting the cruising speed
-    //~ for(byte led_num = 0; led_num < NB_RGB_LEDS; led_num++)
-    //~ {
-        //~ rgbLeds.setPixelColor(led_num, 0x000400000);
-        //~ rgbLeds.show();
-        //~ delay(DEAD_HORSE_VALUE_SEC);
-        //~ console.println(led_num);
-        //~ rgbLeds.setPixelColor(led_num, 0x0);
-        //~ rgbLeds.show();
-    //~ }
-    //~ milestone += tachy.getMeasurementWindow() * 1000;
-    
-    k2000.begin(NB_RGB_LEDS, DURATION_MIN, DURATION_MAX);
+    k2000.begin(NB_RGB_LEDS);
     k2000.setLedCommand(&ledCommand);
     k2000.setGetRate(&getRate);
+    
+    menu.begin(MENU_BROWSER_NB_ENTRIES, MENU_DATA_tables);
 }
 
 void loop()
@@ -336,6 +433,7 @@ void loop()
     userSequencer();
     ihmSequencer();
     k2000.sequencer();
+    menu.sequencer();
     
     if(millis() & 0x200)
         digitalWrite(LED_BUILTIN, 0);

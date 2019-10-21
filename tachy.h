@@ -50,7 +50,7 @@ class TACHY
         word getPulsePerRotate();
         float getLowestValue();
         float getHighestValue();
-        float getClogging();
+        float getRate();
         void setMeasurementWindow(byte value);
         byte getMeasurementWindow();
 
@@ -62,7 +62,7 @@ class TACHY
         float lowestValue;
         float highestValue;
         word pulsePerRotate;
-        float clogging;
+        float rate;
         word pulses;
         unsigned long int totalPulses;
         unsigned long int milestone;

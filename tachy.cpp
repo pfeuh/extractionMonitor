@@ -58,12 +58,12 @@ void TACHY::compute()
     // computing speed
     speed = ((float)pulses  / ((float)pulsePerRotate * (float)measurementWindow)) * 60.0;
     
-    // computing clogging
-    clogging = ((speed - min) / (max - min)) * 100.0;
-    if(clogging > 100.0)
-        clogging = 100.0;
-    else if(clogging < 0.0)
-        clogging = 0.0;
+    // computing rate
+    rate = ((speed - min) / (max - min)) * 100.0;
+    if(rate > 100.0)
+        rate = 100.0;
+    else if(rate < 0.0)
+        rate = 0.0;
     
     // computing min & max values
     if(lowestValue > speed)
@@ -161,9 +161,9 @@ float TACHY::getHighestValue()
     return highestValue;
 }
 
-float TACHY::getClogging()
+float TACHY::getRate()
 {
-    return clogging;
+    return rate;
 }
 
 void TACHY::setMeasurementWindow(byte value)

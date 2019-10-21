@@ -31,11 +31,12 @@ K2000::K2000()
 {
 }
 
-void K2000::begin(byte nb_leds, float duration_min, float duration_max)
+void K2000::begin(byte nb_leds)
 {
     nbLeds = nb_leds;
-    durationMin = duration_min;
-    durationMax = duration_max;
+    durationMin = K2000_FACTORY_DURATION_MIN;
+    durationMax = K2000_FACTORY_DURATION_MAX;
+    luminosity  = K2000_FACTORY_LUMINOSITY;
     ledIndex = nbLeds - 1;
     milestone = millis();
     ledCommand = NULL;
@@ -55,12 +56,32 @@ void K2000::sequencer()
             milestone += duration;
             ledCommand(ledIndex, 0);
             ++ledIndex %= nbLeds;
-            word temp_red = (K2000_LUMINOSITY * rate) / 100;
-            word temp_green = K2000_LUMINOSITY - temp_red;
+            word temp_red = (luminosity * rate) / 100;
+            word temp_green = luminosity - temp_red;
             word color = temp_red + (temp_green << 8);
             ledCommand(ledIndex, color);
         }
     }
+}
+
+void K2000::setDurationMin(float value)
+{
+    durationMin = value;
+}
+
+void K2000::setDurationMax(float value)
+{
+    durationMax = value;
+}
+
+float K2000::getDurationMin()
+{
+    return durationMin;
+}
+
+float K2000::getDurationMax()
+{
+    return durationMax;
 }
 
 void K2000::setLedCommand(void(*callback)(byte led_num, unsigned long int _color))
@@ -72,3 +93,14 @@ void K2000::setGetRate(float(*callback)())
 {
     getRate = callback;
 }
+
+void K2000::setLuminosity(byte value)
+{
+    luminosity = value;
+}
+
+byte K2000::getLuminosity()
+{
+    return luminosity;
+}
+

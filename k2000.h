@@ -24,17 +24,26 @@
 
 #define K2000_VERSION "1.00"
 
-#define K2000_LUMINOSITY 20
+#define K2000_FACTORY_LUMINOSITY 20
+#define K2000_FACTORY_DURATION_MIN 50.0
+#define K2000_FACTORY_DURATION_MAX 1000.0
+
 
 class K2000
 {
     public:
         K2000();
-        void begin(byte nb_leds, float duration_min, float duration_max);
+        void begin(byte nb_leds);
         void sequencer();
+        void setDurationMin(float value);
+        void setDurationMax(float value);
+        float getDurationMin();
+        float getDurationMax();
         void setLedCommand(void(*callback)(byte led_num, unsigned long int _color));
         void setGetRate(float(*callback)());
-    
+        void setLuminosity(byte value);
+        byte getLuminosity();
+
     private:
         void(*ledCommand)(byte led_num, unsigned long int _color);
         float (*getRate)();
@@ -42,6 +51,7 @@ class K2000
         float duration;
         float durationMin;
         float durationMax;
+        byte luminosity;
 
         unsigned long int milestone;
         byte nbLeds;

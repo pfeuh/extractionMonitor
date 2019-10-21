@@ -1,0 +1,4 @@
+editPulsesPerRotate
+editMeasurementWindow
+editMinSpeed
+editMaxSpeed

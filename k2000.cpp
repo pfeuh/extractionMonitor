@@ -51,9 +51,8 @@ void K2000::sequencer()
         {
             rate = getRate();
             duration = ((durationMax - durationMin) * rate) / 100 + durationMin;
-            //~ Serial.print(F("         "));
-            //~ Serial.println(duration);
             milestone += duration;
+            // k2000 is designed for this job...
             ledCommand(ledIndex, 0);
             ++ledIndex %= nbLeds;
             word temp_red = (luminosity * rate) / 100;

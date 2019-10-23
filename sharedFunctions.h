@@ -1,7 +1,7 @@
 /*
  * file : sharedFunctions.h
  * Copyright (c) pfeuh <ze.pfeuh@gmail.com>
- * creation date : 2019/10/20 23:57:01
+ * creation date : 2019/10/23 14:32:39
  * All rights reserved.
  * 
  * This program is free software: you can redistribute it and/or modify
@@ -25,6 +25,22 @@
 /*        by the next generation!           */
 /********************************************/
 
+// Function editCurrentSpeed is black listed.
+
+// Function editCurrentClogging is black listed.
+
+// Function editCurrentWindowWidth is black listed.
+
+// Function editCurrentMin is black listed.
+
+// Function editCurrentMax is black listed.
+
+// Function editCurrentLuminosity is black listed.
+
+// Function editCurrentDurationMin is black listed.
+
+// Function editCurrentDurationMax is black listed.
+
 // Function editPulsesPerRotate is black listed.
 
 // Function editMeasurementWindow is black listed.
@@ -32,4 +48,32 @@
 // Function editMinSpeed is black listed.
 
 // Function editMaxSpeed is black listed.
+
+// Function editLuminosity is black listed.
+
+// Function editDurationMin is black listed.
+
+// Function editDurationMax is black listed.
+
+// Function editSerialOutputSwitch is black listed.
+
+// Function editSerialBaudrate is black listed.
+
+// Function editSpeedSwitch is black listed.
+
+// Function editCloggingSwitch is black listed.
+
+// Function editVersion is black listed.
+
+// Function editTimestamp is black listed.
+
+// Function storeConfig is black listed.
+
+// Function readConfig is black listed.
+
+// Function factory is black listed.
+
+// Function calibMin is black listed.
+
+// Function calibMax is black listed.
 

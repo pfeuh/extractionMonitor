@@ -4,7 +4,7 @@
 /*
  * file : menuData.h
  * Copyright (c) pfeuh <ze.pfeuh@gmail.com>
- * creation date : 2019/10/20 23:57:01
+ * creation date : 2019/10/23 14:32:39
  * All rights reserved.
  * 
  * This program is free software: you can redistribute it and/or modify
@@ -29,112 +29,345 @@
 /********************************************/
 
 // Table of %s root's title     00021
-// Table of parent              00006
-// Table of child               00006
-// Table of next                00006
-// Table of previous            00006
-// Table of labels              00068
-// Table of pointers to labels  00012
-// Table of function callbacks  00012
-// Table of edit callbacks      00012
-// Table of types               00006
+// Table of parent              00033
+// Table of child               00033
+// Table of next                00033
+// Table of previous            00033
+// Table of labels              00398
+// Table of pointers to labels  00066
+// Table of function callbacks  00066
+// Table of edit callbacks      00066
+// Table of types               00033
 // ----------------------------------
-// TOTAL                        00155
+// TOTAL                        00782
 
 #include <Arduino.h>
 #include <menuBrowser.h>
 
-#define MENU_BROWSER_NB_ENTRIES 6
-#define MENU_BROWSER_NB_VARIABLES 4
-#define MENU_BROWSER_NB_FUNCTIONS 0
+#define MENU_BROWSER_NB_ENTRIES 33
+#define MENU_BROWSER_NB_VARIABLES 21
+#define MENU_BROWSER_NB_FUNCTIONS 5
 
 const char MENU_BROWSER_ROOT_LABEL[21] PROGMEM = "EXTRACTION's MONITOR";
 
 // functions
+extern byte storeConfig();
+extern byte readConfig();
+extern byte factory();
+extern byte calibMin();
+extern byte calibMax();
 
 // edit/display variables' functions
+extern void editCurrentSpeed(byte direction);
+extern void editCurrentClogging(byte direction);
+extern void editCurrentWindowWidth(byte direction);
+extern void editCurrentMin(byte direction);
+extern void editCurrentMax(byte direction);
+extern void editCurrentLuminosity(byte direction);
+extern void editCurrentDurationMin(byte direction);
+extern void editCurrentDurationMax(byte direction);
 extern void editPulsesPerRotate(byte direction);
 extern void editMeasurementWindow(byte direction);
 extern void editMinSpeed(byte direction);
 extern void editMaxSpeed(byte direction);
+extern void editLuminosity(byte direction);
+extern void editDurationMin(byte direction);
+extern void editDurationMax(byte direction);
+extern void editSerialOutputSwitch(byte direction);
+extern void editSerialBaudrate(byte direction);
+extern void editSpeedSwitch(byte direction);
+extern void editCloggingSwitch(byte direction);
+extern void editVersion(byte direction);
+extern void editTimestamp(byte direction);
 
 const byte MENU_DATA_parentTable[MENU_BROWSER_NB_ENTRIES] PROGMEM = 
 {
    /* 000 */ MENU_BROWSER_NO_ENTRY,
    /* 001 */   0,
-   /* 002 */   1,
-   /* 003 */   1,
-   /* 004 */   1,
-   /* 005 */   1,
+   /* 002 */   0,
+   /* 003 */   0,
+   /* 004 */   0,
+   /* 005 */   0,
+   /* 006 */   0,
+   /* 007 */   0,
+   /* 008 */   0,
+   /* 009 */ MENU_BROWSER_NO_ENTRY,
+   /* 010 */   9,
+   /* 011 */  10,
+   /* 012 */  10,
+   /* 013 */   9,
+   /* 014 */  13,
+   /* 015 */  13,
+   /* 016 */  13,
+   /* 017 */  13,
+   /* 018 */  13,
+   /* 019 */   9,
+   /* 020 */  19,
+   /* 021 */  19,
+   /* 022 */  19,
+   /* 023 */   9,
+   /* 024 */  23,
+   /* 025 */  23,
+   /* 026 */  23,
+   /* 027 */  23,
+   /* 028 */ MENU_BROWSER_NO_ENTRY,
+   /* 029 */  28,
+   /* 030 */  28,
+   /* 031 */  28,
+   /* 032 */  28,
 };
 
 const byte MENU_DATA_childTable[MENU_BROWSER_NB_ENTRIES] PROGMEM = 
 {
    /* 000 */   1,
-   /* 001 */   2,
+   /* 001 */ MENU_BROWSER_NO_ENTRY,
    /* 002 */ MENU_BROWSER_NO_ENTRY,
    /* 003 */ MENU_BROWSER_NO_ENTRY,
    /* 004 */ MENU_BROWSER_NO_ENTRY,
    /* 005 */ MENU_BROWSER_NO_ENTRY,
+   /* 006 */ MENU_BROWSER_NO_ENTRY,
+   /* 007 */ MENU_BROWSER_NO_ENTRY,
+   /* 008 */ MENU_BROWSER_NO_ENTRY,
+   /* 009 */  10,
+   /* 010 */  11,
+   /* 011 */ MENU_BROWSER_NO_ENTRY,
+   /* 012 */ MENU_BROWSER_NO_ENTRY,
+   /* 013 */  14,
+   /* 014 */ MENU_BROWSER_NO_ENTRY,
+   /* 015 */ MENU_BROWSER_NO_ENTRY,
+   /* 016 */ MENU_BROWSER_NO_ENTRY,
+   /* 017 */ MENU_BROWSER_NO_ENTRY,
+   /* 018 */ MENU_BROWSER_NO_ENTRY,
+   /* 019 */  20,
+   /* 020 */ MENU_BROWSER_NO_ENTRY,
+   /* 021 */ MENU_BROWSER_NO_ENTRY,
+   /* 022 */ MENU_BROWSER_NO_ENTRY,
+   /* 023 */  24,
+   /* 024 */ MENU_BROWSER_NO_ENTRY,
+   /* 025 */ MENU_BROWSER_NO_ENTRY,
+   /* 026 */ MENU_BROWSER_NO_ENTRY,
+   /* 027 */ MENU_BROWSER_NO_ENTRY,
+   /* 028 */  29,
+   /* 029 */ MENU_BROWSER_NO_ENTRY,
+   /* 030 */ MENU_BROWSER_NO_ENTRY,
+   /* 031 */ MENU_BROWSER_NO_ENTRY,
+   /* 032 */ MENU_BROWSER_NO_ENTRY,
 };
 
 const byte MENU_DATA_nextTable[MENU_BROWSER_NB_ENTRIES] PROGMEM = 
 {
-   /* 000 */ MENU_BROWSER_NO_ENTRY,
-   /* 001 */ MENU_BROWSER_NO_ENTRY,
+   /* 000 */   9,
+   /* 001 */   2,
    /* 002 */   3,
    /* 003 */   4,
    /* 004 */   5,
-   /* 005 */ MENU_BROWSER_NO_ENTRY,
+   /* 005 */   6,
+   /* 006 */   7,
+   /* 007 */   8,
+   /* 008 */ MENU_BROWSER_NO_ENTRY,
+   /* 009 */  28,
+   /* 010 */  13,
+   /* 011 */  12,
+   /* 012 */ MENU_BROWSER_NO_ENTRY,
+   /* 013 */  19,
+   /* 014 */  15,
+   /* 015 */  16,
+   /* 016 */  17,
+   /* 017 */  18,
+   /* 018 */ MENU_BROWSER_NO_ENTRY,
+   /* 019 */  23,
+   /* 020 */  21,
+   /* 021 */  22,
+   /* 022 */ MENU_BROWSER_NO_ENTRY,
+   /* 023 */ MENU_BROWSER_NO_ENTRY,
+   /* 024 */  25,
+   /* 025 */  26,
+   /* 026 */  27,
+   /* 027 */ MENU_BROWSER_NO_ENTRY,
+   /* 028 */ MENU_BROWSER_NO_ENTRY,
+   /* 029 */  30,
+   /* 030 */  31,
+   /* 031 */  32,
+   /* 032 */ MENU_BROWSER_NO_ENTRY,
 };
 
 const byte MENU_DATA_previousTable[MENU_BROWSER_NB_ENTRIES] PROGMEM = 
 {
    /* 000 */ MENU_BROWSER_NO_ENTRY,
    /* 001 */ MENU_BROWSER_NO_ENTRY,
-   /* 002 */ MENU_BROWSER_NO_ENTRY,
+   /* 002 */   1,
    /* 003 */   2,
    /* 004 */   3,
    /* 005 */   4,
+   /* 006 */   5,
+   /* 007 */   6,
+   /* 008 */   7,
+   /* 009 */   0,
+   /* 010 */ MENU_BROWSER_NO_ENTRY,
+   /* 011 */ MENU_BROWSER_NO_ENTRY,
+   /* 012 */  11,
+   /* 013 */  10,
+   /* 014 */ MENU_BROWSER_NO_ENTRY,
+   /* 015 */  14,
+   /* 016 */  15,
+   /* 017 */  16,
+   /* 018 */  17,
+   /* 019 */  13,
+   /* 020 */ MENU_BROWSER_NO_ENTRY,
+   /* 021 */  20,
+   /* 022 */  21,
+   /* 023 */  19,
+   /* 024 */ MENU_BROWSER_NO_ENTRY,
+   /* 025 */  24,
+   /* 026 */  25,
+   /* 027 */  26,
+   /* 028 */   9,
+   /* 029 */ MENU_BROWSER_NO_ENTRY,
+   /* 030 */  29,
+   /* 031 */  30,
+   /* 032 */  31,
 };
 
-/*   0 */ const char labelDevices[] PROGMEM = "MODULES";
-/*   1 */ const char labelTachy[] PROGMEM = "MESURE";
-/*   2 */ const char labelPulsesPerRotate[] PROGMEM = "Impulsions/tour";
-/*   3 */ const char labelMeasurementWindow[] PROGMEM = "Cycle mesure";
-/*   4 */ const char labelMinSpeed[] PROGMEM = "Vitesse min";
-/*   5 */ const char labelMaxSpeed[] PROGMEM = "VItesse max";
+/*   0 */ const char labelMonitor[] PROGMEM = "MONITEUR";
+/*   1 */ const char labelCurrentSpeed[] PROGMEM = "Vitesse";
+/*   2 */ const char labelCurrentClogging[] PROGMEM = "Bouchage";
+/*   3 */ const char labelCurrentWindowWidth[] PROGMEM = "Cycle mesure";
+/*   4 */ const char labelCurrentMin[] PROGMEM = "Min";
+/*   5 */ const char labelCurrentMax[] PROGMEM = "Max";
+/*   6 */ const char labelCurrentLuminosity[] PROGMEM = "Luminosite";
+/*   7 */ const char labelCurrentDurationMin[] PROGMEM = "Duree min du pas";
+/*   8 */ const char labelCurrentDurationMax[] PROGMEM = "Duree max du pas";
+/*   9 */ const char labelDevices[] PROGMEM = "MODULES";
+/*  10 */ const char labelTachy[] PROGMEM = "TACHY";
+/*  11 */ const char labelPulsesPerRotate[] PROGMEM = "Impulsions/tour";
+/*  12 */ const char labelMeasurementWindow[] PROGMEM = "Cycle mesure";
+/*  13 */ const char labelK2000[] PROGMEM = "K2000";
+/*  14 */ const char labelMinSpeed[] PROGMEM = "Vitesse min";
+/*  15 */ const char labelMaxSpeed[] PROGMEM = "Vitesse max";
+/*  16 */ const char labelLuminosity[] PROGMEM = "Luminosite LED";
+/*  17 */ const char labelDurationMin[] PROGMEM = "Duree min du pas";
+/*  18 */ const char labelDurationMax[] PROGMEM = "Duree max du pas";
+/*  19 */ const char labelStorage[] PROGMEM = "MEMOIRE";
+/*  20 */ const char labelStoreConfig[] PROGMEM = "Sauver config.";
+/*  21 */ const char labelReadConfig[] PROGMEM = "Charger config.";
+/*  22 */ const char labelFactory[] PROGMEM = "Config. usine";
+/*  23 */ const char labelExport[] PROGMEM = "EXPORT";
+/*  24 */ const char labelSerialOutputSwitch[] PROGMEM = "Exportation";
+/*  25 */ const char labelSerialBaudrate[] PROGMEM = "Debit";
+/*  26 */ const char labelSpeedSwitch[] PROGMEM = "Vitesse ventilat.";
+/*  27 */ const char labelCloggingSwitch[] PROGMEM = "Taux de bouchage";
+/*  28 */ const char labelMaintenance[] PROGMEM = "SYSTEME";
+/*  29 */ const char labelCalibMin[] PROGMEM = "Etalonner min";
+/*  30 */ const char labelCalibMax[] PROGMEM = "Etalonner max";
+/*  31 */ const char labelVersion[] PROGMEM = "Version de l'app.";
+/*  32 */ const char labelTimestamp[] PROGMEM = "Date compilation";
 
 const char *const MENU_DATA_labelsTable[MENU_BROWSER_NB_ENTRIES] PROGMEM =
 {
-    /*   0 */ labelDevices,
-    /*   1 */ labelTachy,
-    /*   2 */ labelPulsesPerRotate,
-    /*   3 */ labelMeasurementWindow,
-    /*   4 */ labelMinSpeed,
-    /*   5 */ labelMaxSpeed,
+    /*   0 */ labelMonitor,
+    /*   1 */ labelCurrentSpeed,
+    /*   2 */ labelCurrentClogging,
+    /*   3 */ labelCurrentWindowWidth,
+    /*   4 */ labelCurrentMin,
+    /*   5 */ labelCurrentMax,
+    /*   6 */ labelCurrentLuminosity,
+    /*   7 */ labelCurrentDurationMin,
+    /*   8 */ labelCurrentDurationMax,
+    /*   9 */ labelDevices,
+    /*  10 */ labelTachy,
+    /*  11 */ labelPulsesPerRotate,
+    /*  12 */ labelMeasurementWindow,
+    /*  13 */ labelK2000,
+    /*  14 */ labelMinSpeed,
+    /*  15 */ labelMaxSpeed,
+    /*  16 */ labelLuminosity,
+    /*  17 */ labelDurationMin,
+    /*  18 */ labelDurationMax,
+    /*  19 */ labelStorage,
+    /*  20 */ labelStoreConfig,
+    /*  21 */ labelReadConfig,
+    /*  22 */ labelFactory,
+    /*  23 */ labelExport,
+    /*  24 */ labelSerialOutputSwitch,
+    /*  25 */ labelSerialBaudrate,
+    /*  26 */ labelSpeedSwitch,
+    /*  27 */ labelCloggingSwitch,
+    /*  28 */ labelMaintenance,
+    /*  29 */ labelCalibMin,
+    /*  30 */ labelCalibMax,
+    /*  31 */ labelVersion,
+    /*  32 */ labelTimestamp,
 };
 
-const PROGMEM MENU_BROWSER_FUNCTION_PTR MENU_DATA_execFunctionsTable[0] = 
+const PROGMEM MENU_BROWSER_FUNCTION_PTR MENU_DATA_execFunctionsTable[5] = 
 {
+    /*  20   0 */ &storeConfig,
+    /*  21   1 */ &readConfig,
+    /*  22   2 */ &factory,
+    /*  29   3 */ &calibMin,
+    /*  30   4 */ &calibMax,
 };
 
-const PROGMEM MENU_BROWSER_EDIT_PTR MENU_DATA_editFunctionsTable[4] = 
+const PROGMEM MENU_BROWSER_EDIT_PTR MENU_DATA_editFunctionsTable[21] = 
 {
-    /*   2   0 */ &editPulsesPerRotate,
-    /*   3   1 */ &editMeasurementWindow,
-    /*   4   2 */ &editMinSpeed,
-    /*   5   3 */ &editMaxSpeed,
+    /*   1   0 */ &editCurrentSpeed,
+    /*   2   1 */ &editCurrentClogging,
+    /*   3   2 */ &editCurrentWindowWidth,
+    /*   4   3 */ &editCurrentMin,
+    /*   5   4 */ &editCurrentMax,
+    /*   6   5 */ &editCurrentLuminosity,
+    /*   7   6 */ &editCurrentDurationMin,
+    /*   8   7 */ &editCurrentDurationMax,
+    /*  11   8 */ &editPulsesPerRotate,
+    /*  12   9 */ &editMeasurementWindow,
+    /*  14  10 */ &editMinSpeed,
+    /*  15  11 */ &editMaxSpeed,
+    /*  16  12 */ &editLuminosity,
+    /*  17  13 */ &editDurationMin,
+    /*  18  14 */ &editDurationMax,
+    /*  24  15 */ &editSerialOutputSwitch,
+    /*  25  16 */ &editSerialBaudrate,
+    /*  26  17 */ &editSpeedSwitch,
+    /*  27  18 */ &editCloggingSwitch,
+    /*  31  19 */ &editVersion,
+    /*  32  20 */ &editTimestamp,
 };
 
-const byte MENU_DATA_itemTypeTable[6] PROGMEM = 
+const byte MENU_DATA_itemTypeTable[33] PROGMEM = 
 {
    /* 000 */ menuTypeMenu,
-   /* 001 */ menuTypeMenu,
-   /* 002 */ menuTypeVariable,
-   /* 003 */ menuTypeVariable,
-   /* 004 */ menuTypeVariable,
-   /* 005 */ menuTypeVariable,
+   /* 001 */ menuTypeVariable | MENU_BROWSER_LIVING_MASK,
+   /* 002 */ menuTypeVariable | MENU_BROWSER_LIVING_MASK,
+   /* 003 */ menuTypeVariable | MENU_BROWSER_RO_MASK,
+   /* 004 */ menuTypeVariable | MENU_BROWSER_RO_MASK,
+   /* 005 */ menuTypeVariable | MENU_BROWSER_RO_MASK,
+   /* 006 */ menuTypeVariable | MENU_BROWSER_RO_MASK,
+   /* 007 */ menuTypeVariable | MENU_BROWSER_RO_MASK,
+   /* 008 */ menuTypeVariable | MENU_BROWSER_RO_MASK,
+   /* 009 */ menuTypeMenu,
+   /* 010 */ menuTypeMenu,
+   /* 011 */ menuTypeVariable,
+   /* 012 */ menuTypeVariable,
+   /* 013 */ menuTypeMenu,
+   /* 014 */ menuTypeVariable,
+   /* 015 */ menuTypeVariable,
+   /* 016 */ menuTypeVariable,
+   /* 017 */ menuTypeVariable,
+   /* 018 */ menuTypeVariable,
+   /* 019 */ menuTypeMenu,
+   /* 020 */ menuTypeFunction,
+   /* 021 */ menuTypeFunction,
+   /* 022 */ menuTypeFunction,
+   /* 023 */ menuTypeMenu,
+   /* 024 */ menuTypeVariable,
+   /* 025 */ menuTypeVariable,
+   /* 026 */ menuTypeVariable,
+   /* 027 */ menuTypeVariable,
+   /* 028 */ menuTypeMenu,
+   /* 029 */ menuTypeFunction,
+   /* 030 */ menuTypeFunction,
+   /* 031 */ menuTypeVariable | MENU_BROWSER_RO_MASK,
+   /* 032 */ menuTypeVariable | MENU_BROWSER_RO_MASK,
 };
 
 const word _MENU_DATA_tables[] =

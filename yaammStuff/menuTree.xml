@@ -1,41 +1,49 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <menuTree>
     <rootTitle label="EXTRACTION's MONITOR"/>
+    <menu cname="monitor" label="MONITEUR">
+	    <variable cname="currentSpeed" label="Vitesse"  living="1" />
+	    <variable cname="currentClogging" label="Bouchage" living="1" />
+	    <variable cname="currentWindowWidth" label="Cycle mesure" readonly="1" />
+	    <variable cname="currentMin" label="Min"  readonly="1" />
+	    <variable cname="currentMax" label="Max"  readonly="1" />
+        <variable cname="currentLuminosity" label="Luminosite" readonly="1" />
+        <variable cname="currentDurationMin" label="Duree min du pas" readonly="1" />
+        <variable cname="currentDurationMax" label="Duree max du pas" readonly="1" />
+    </menu>
     <menu cname="devices" label="MODULES">
-        <menu cname="tachy" label="MESURE">
+        <menu cname="tachy" label="TACHY">
             <variable cname="pulsesPerRotate" label="Impulsions/tour" />
             <variable cname="measurementWindow" label="Cycle mesure" />
-            <variable cname="minSpeed" label="Vitesse min" />
-            <variable cname="maxSpeed" label="VItesse max" />        
-        </menu><!--
-        <menu cname="k2000" label="K2000">
-            <variable cname="durationMin" label="Duree LED 100%" />
-            <variable cname="durationMax" label="Duree LED   0%" />
-            <variable cname="luminosity" label="Luminosite LED" />
         </menu>
+        <menu cname="k2000" label="K2000">
+            <variable cname="minSpeed" label="Vitesse min" />
+            <variable cname="maxSpeed" label="Vitesse max" />        
+            <variable cname="luminosity" label="Luminosite LED" />
+            <variable cname="durationMin" label="Duree min du pas" />
+            <variable cname="durationMax" label="Duree max du pas" />
+        </menu><!--
         <menu cname="display" label="ECRAN">
             <variable cname="viewSpeed" label="Vitesse ventilat." />
             <variable cname="viewClogging" label="Taux de bouchage" />
             <variable cname="viewMinMax" label="Voir min-max" />
-        </menu>
+        </menu>-->
         <menu cname="storage" label="MEMOIRE">
             <function cname="storeConfig" label="Sauver config." />
             <function cname="readConfig" label="Charger config." />
             <function cname="factory" label="Config. usine" />
         </menu>
         <menu cname="export" label="EXPORT">
-            <variable cname="serialOutputSwitch" label="Exporter" />
+            <variable cname="serialOutputSwitch" label="Exportation" />
             <variable cname="serialBaudrate" label="Debit" />
             <variable cname="speedSwitch" label="Vitesse ventilat." />
             <variable cname="cloggingSwitch" label="Taux de bouchage" />
         </menu>
     </menu>
     <menu cname="maintenance" label="SYSTEME">
-	    <function cname="setMin" label="Saisir min " />
-	    <function cname="setMax" label="Saisir max" />
 	    <function cname="calibMin" label="Etalonner min" />
 	    <function cname="calibMax" label="Etalonner max" />
-	    <function cname="version" label="Version Soft" readonly="1" />
-	    <function cname="timestamp" label="Date compilation" readonly="1" /> -->
+	    <variable cname="version" label="Version de l'app." readonly="1" />
+	    <variable cname="timestamp" label="Date compilation" readonly="1" /> -->
     </menu>
 </menuTree>

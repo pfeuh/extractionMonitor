@@ -168,7 +168,9 @@ float TACHY::getRate()
 
 void TACHY::setMeasurementWindow(byte value)
 {
+    milestone -= measurementWindow;
     measurementWindow = value;
+    milestone += measurementWindow;
 }
 
 byte TACHY::getMeasurementWindow()

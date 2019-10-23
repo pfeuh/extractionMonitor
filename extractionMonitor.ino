@@ -28,6 +28,10 @@
 #define EEPROM_ADDR_LUMINOSITY (EEPROM_ADDR_DURATION_MAX + sizeof(float))
 #define EEPROM_DATASIZE (EEPROM_ADDR_LUMINOSITY + sizeof(byte))
 
+#define ERR_NOT_IMPLEMENTED_YET 1
+
+#define dpeek pgm_read_dword
+
 #include "tachy.h"
 #define TACHY_PIN 3
 TACHY tachy = TACHY(TACHY_PIN);
@@ -45,195 +49,231 @@ Adafruit_NeoPixel rgbLeds = Adafruit_NeoPixel(NB_RGB_LEDS, RGB_LEDS_PIN, NEO_GBR
 #include <arduinoMenu.h>
 #include "menuData.h"
 #include "sharedFunctions.h"
+MENU_ENCODER encoder = MENU_ENCODER(5, 6, 7);
+LiquidCrystal_I2C display(0x27, 20, 4);
 ARDUINO_MENU menu = ARDUINO_MENU();
 
-const char PROGMEM title[] = "Extraction monitor v. " TACHY_VERSION;
-const char PROGMEM timestamp[] = __DATE__ " " __TIME__;
+const char PROGMEM appVersion[] = TACHY_VERSION;
+const char PROGMEM compilationTimestamp[] = __DATE__ " " __TIME__;
+const char PROGMEM unitSecond[] = " sec";
+const char PROGMEM unitRpm[] = " tr/min";
+const char PROGMEM unitPerCent[] = " %s";
+const char PROGMEM unitMilliSec[] = " ms";
+const char PROGMEM unitBaud[] = " baud";
 
-char userCommand;
-unsigned long int userValue;
-unsigned long int milestone;
-
-#define console Serial
-
-// serial commands:
-// '*' + [1:65535] set k2000 max duration
-// '/' + [1:65535] set k2000 min duration
-// '+' + [1:65535] set 100% value
-// '-' + [1:65535] set 0% value
-// 'p' + [1:65535] set pulses per rotate
-// 'w' + [1:65]    set measurement window width in seconds
-// 'i' + [1:255]   set led intensity (luminosity)
-// 'l'             put current rate to low point 0%
-// 'h'             put current rate to hi point 100%
-// 'r'             read eeprom config
-// 's'             store eeprom config
-// '?'             view config
-
-void print_P(const char* address)
+const long serialBaudrate[] PROGMEM = 
 {
-    while(pgm_read_byte(address))
-        console.write(pgm_read_byte(address++));
+    9600,
+    19200,
+    38400,
+    57600,
+    74880,
+    115200
+};
+#define NB_BAUDRATES (sizeof(serialBaudrate) / sizeof(long))
+
+bool serialOutputSwitch = true;
+byte serialBaudrateIndex = 0;
+bool speedSwitch = true; 
+bool cloggingSwitch = true; 
+
+/*************/
+/* callbacks */
+/*************/
+
+void ledCommand(byte led_num, unsigned long int _color)
+{
+    rgbLeds.setPixelColor(led_num, _color);
+    rgbLeds.show();
 }
 
-void println_P(const char* address)
+float getRate()
 {
-    print_P(address);
-    console.write('\n');
+    return tachy.getRate();
 }
 
-void printMaxCloggingDuration()
+/************************/
+/* Factorized functions */
+/************************/
+
+void printExportFlag(bool flag)
 {
-    console.print(F("max clogging set to "));
-    console.print(k2000.getDurationMax());
-    console.print(" msec\n");
+    if(flag)
+        menu.printVariable(F("Exporter"));
+    else
+        menu.printVariable(F("Ne pas exporter"));
 }
 
-void printMinCloggingDuration()
+void printActiveFlag(bool flag)
 {
-    console.print(F("min clogging set to "));
-    console.print(k2000.getDurationMin());
-    console.print(" msec\n");
+    if(flag)
+        menu.printVariable(F("Active"));
+    else
+        menu.printVariable(F("Inactive"));
 }
 
-void printLuminosity()
+/*****************************/
+/* Functions for arduinoMenu */
+/*****************************/
+
+void editCurrentSpeed(byte direction)
 {
-    console.print(F("luminosity set to "));
-    console.print(k2000.getDurationMin());
-    console.print("/255\n");
+    if(direction){};
+    menu.printVariable(tachy.getSpeed());
+    menu.print_P(unitRpm);
 }
 
-void printMax()
+void editCurrentWindowWidth(byte direction)
 {
-    console.print(F("100% set to "));
-    console.print(tachy.getMax());
-    console.print(" rpm\n");
+    if(direction){};
+    menu.printVariable(tachy.getMeasurementWindow());
+    menu.print_P(unitSecond);
 }
 
-void printMin()
+void editCurrentMin(byte direction)
 {
-    console.print(F("0% set to "));
-    console.print(tachy.getMin());
-    console.print(" rpm\n");
+    if(direction){};
+    menu.printVariable(tachy.getMin());
+    menu.print_P(unitRpm);
 }
 
-void printPulsePerRotate()
+void editCurrentMax(byte direction)
 {
-    console.print(F("pulses per rotate set to "));
-    console.print(tachy.getPulsePerRotate());
-    console.write('\n');
+    if(direction){};
+    menu.printVariable(tachy.getMax());
+    menu.print_P(unitRpm);
 }
 
-void printMeasurementWindow()
+void editCurrentClogging(byte direction)
 {
-    console.print(F("measurement window set to "));
-    console.print(tachy.getMeasurementWindow());
-    console.print(F(" seconds\n"));
+    if(direction){};
+    menu.printVariable(tachy.getRate());
+    menu.print_P(unitPerCent);
 }
 
-void printCalibrateLow()
+void editCurrentDurationMin(byte direction)
 {
-    console.print(F("0% calibrated to "));
-    console.print(tachy.getMin());
-    console.print(" rpm\n");
+    if(direction){};
+    menu.printVariable((unsigned long int)k2000.getDurationMin());
+    menu.print_P(unitMilliSec);
 }
 
-void printCalibrateHi()
+void editCurrentDurationMax(byte direction)
 {
-    console.print(F("100% calibrated to "));
-    console.print(tachy.getMax());
-    console.print(" rpm\n");
+    if(direction){};
+    menu.printVariable((unsigned long int)k2000.getDurationMax());
+    menu.print_P(unitMilliSec);
 }
 
-void printConfig()
+void editCurrentLuminosity(byte direction)
 {
-    printMin();
-    printMax();
-    printPulsePerRotate();
-    printMeasurementWindow();
-    printMaxCloggingDuration();
-    printMinCloggingDuration();
+    if(direction){};
+    menu.printVariable(k2000.getLuminosity());
 }
 
-void ihmSequencer()
+void editPulsesPerRotate(byte direction)
 {
-    if(millis() > milestone)
+    if(direction == MENU_BROWSER_DATA_INCREASE)
+        tachy.setPulsePerRotate(tachy.getPulsePerRotate() + 1.0);
+    else if(direction == MENU_BROWSER_DATA_DECREASE)
+        tachy.setPulsePerRotate(tachy.getPulsePerRotate() - 1.0);
+    menu.printVariable((int)tachy.getPulsePerRotate());
+}
+
+void editMeasurementWindow(byte direction)
+{
+    if(direction == MENU_BROWSER_DATA_INCREASE)
     {
-        milestone += tachy.getMeasurementWindow() * 1000;
-        //~ console.write('[');
-        //~ console.print(tachy.getLowestValue());
-        //~ console.write(':');
-        //~ console.print(tachy.getHighestValue());
-        //~ console.write(']');
-        //~ console.write(' ');
-        
-        console.print(tachy.getRate());
-        console.print("% ");
-        console.print(tachy.getSpeed());
-        console.print(" rpm\n");
-
-        //~ console.print(tachy.getRate());
-        //~ console.print(F("\n"));
-
-        
+        if(tachy.getMeasurementWindow() != 255)
+            tachy.setMeasurementWindow(tachy.getMeasurementWindow() + 1);
+        else
+            tachy.setMeasurementWindow(1);
     }
+    else if(direction == MENU_BROWSER_DATA_DECREASE)
+    {
+        if(tachy.getMeasurementWindow() != 1)
+            tachy.setMeasurementWindow(tachy.getMeasurementWindow() - 1);
+        else
+            tachy.setMeasurementWindow(255);
+    }
+    menu.printVariable(tachy.getMeasurementWindow());
+    menu.print_P(unitSecond);
 }
 
-void setMaxCloggingDuration(float value)
+void editMinSpeed(byte direction)
 {
-    k2000.setDurationMax(value);
-    printMaxCloggingDuration();
+    if(direction == MENU_BROWSER_DATA_INCREASE)
+        tachy.setMin(tachy.getMin() + 1.0);
+    else if(direction == MENU_BROWSER_DATA_DECREASE)
+        tachy.setMin(tachy.getMin() - 1.0);
+    menu.printVariable(tachy.getMin());
+    menu.print_P(unitRpm);
 }
 
-void setMinCloggingDuration(float value)
+void editMaxSpeed(byte direction)
 {
-    k2000.setDurationMin(value);
-    printMinCloggingDuration();
+    if(direction == MENU_BROWSER_DATA_INCREASE)
+        tachy.setMax(tachy.getMax() + 1.0);
+    else if(direction == MENU_BROWSER_DATA_DECREASE)
+        tachy.setMax(tachy.getMax() - 1.0);
+    menu.printVariable(tachy.getMax());
+    menu.print_P(unitRpm);
 }
 
-void setMax(float value)
+void editDurationMin(byte direction)
 {
-    tachy.setMax(value);
-    printMax();
+    if(direction){};
+    //~ if(direction == MENU_BROWSER_DATA_INCREASE)
+        //~ durationMin +=1;
+    //~ else if(direction == MENU_BROWSER_DATA_DECREASE)
+        //~ durationMin -=1;
+    //~ menu.printVariable(durationMin);
 }
 
-void setMin(float value)
+void editDurationMax(byte direction)
 {
-    tachy.setMin(value);
-    printMin();
+    if(direction){};
+    //~ if(direction == MENU_BROWSER_DATA_INCREASE)
+        //~ durationMax +=1;
+    //~ else if(direction == MENU_BROWSER_DATA_DECREASE)
+        //~ durationMax -=1;
+    //~ menu.printVariable(durationMax);
 }
 
-void setPulsePerRotate(float value)
+void editLuminosity(byte direction)
 {
-    tachy.setPulsePerRotate(value);
-    printPulsePerRotate();
+    if(direction == MENU_BROWSER_DATA_INCREASE)
+        k2000.setLuminosity(k2000.getLuminosity() + 4);
+    else if(direction == MENU_BROWSER_DATA_DECREASE)
+        k2000.setLuminosity(k2000.getLuminosity() - 4);
+    menu.printVariable(k2000.getLuminosity() / 4);
 }
 
-void setMeasurementWindow(byte value)
+byte calibMin()
 {
-    tachy.setMeasurementWindow(value);
-    printMeasurementWindow();
+    tachy.setMin(tachy.getSpeed());
+    return 0;
 }
 
-void calibrateLow()
+byte calibMax()
 {
-    tachy.calibrateLow();
-    printCalibrateLow();
+    tachy.setMax(tachy.getSpeed());
+    return 0;
 }
 
-void calibrateHi()
+void editVersion(byte direction)
 {
-    tachy.calibrateHi();
-    printCalibrateHi();
+    if(direction){};
+    menu.printVariable_P(appVersion);
 }
 
-void setLuminosity(byte value)
+void editTimestamp(byte direction)
 {
-    k2000.setLuminosity(value);
-    printLuminosity();
+    if(direction){};
+    menu.printVariable_P(compilationTimestamp);
 }
 
-void readConfig()
+byte readConfig()
 {
     float min;
     float max;
@@ -253,11 +293,10 @@ void readConfig()
     tachy.setMeasurementWindow(measurementWindow);
     k2000.setDurationMin(dmin);
     k2000.setDurationMax(dmax);
-    //~ printConfig();
-    console.print(F("Configuration read!\n"));
+    return 0;
 }
 
-void storeConfig()
+byte storeConfig()
 {
     EEPROM.put(EEPROM_ADDR_MIN, tachy.getMin());
     EEPROM.put(EEPROM_ADDR_MAX, tachy.getMax());
@@ -265,154 +304,62 @@ void storeConfig()
     EEPROM.put(EEPROM_ADDR_MEASUREMENT_WINDOW, tachy.getMeasurementWindow());
     EEPROM.put(EEPROM_ADDR_DURATION_MIN, k2000.getDurationMin());
     EEPROM.put(EEPROM_ADDR_DURATION_MAX, k2000.getDurationMax());
-    printConfig();
-    console.print(F("Configuration stored\n"));
+    return 0;
 }
 
-void executeCommand()
+byte factory()
 {
-    switch(userCommand)
+    return ERR_NOT_IMPLEMENTED_YET;
+}
+void editSerialOutputSwitch(byte direction)
+{
+    if(direction == MENU_BROWSER_DATA_INCREASE)
+        serialOutputSwitch  = true;
+    else if(direction == MENU_BROWSER_DATA_DECREASE)
+        serialOutputSwitch = false;
+    printActiveFlag(serialOutputSwitch);
+}
+
+void editSerialBaudrate(byte direction)
+{
+    if(direction == MENU_BROWSER_DATA_INCREASE)
     {
-        case '*':
-            setMaxCloggingDuration(userValue);
-            break;
-        case '/':
-            setMinCloggingDuration(userValue);
-            break;
-        case 'i':
-            setLuminosity(userValue);
-            break;
-        case '+':
-            setMax(userValue);
-            break;
-        case '-':
-            setMin(userValue);
-            break;
-        case 'p':
-            setPulsePerRotate(userValue);
-            break;
-        case 'w':
-            setMeasurementWindow(userValue);
-            break;
-        case 'l':
-            calibrateLow();
-            break;
-        case 'h':
-            calibrateHi();
-            break;
-        case 'r':
-            readConfig();
-            break;
-        case 's':
-            storeConfig();
-            break;
-        case '?':
-            printConfig();
-            break;
-        default:
-            break;
+        if(serialBaudrateIndex <(NB_BAUDRATES - 1))
+            serialBaudrateIndex +=1;
     }
-    userValue = 0;
-    userCommand = '\0';
-}
-
-void userSequencer()
-{
-    char c;
-    
-    while(Serial.available())
+    else if(direction == MENU_BROWSER_DATA_DECREASE)
     {
-        c = Serial.read();
-        switch(c)
-        {
-            case '0':
-            case '1':
-            case '2':
-            case '3':
-            case '4':
-            case '5':
-            case '6':
-            case '7':
-            case '8':
-            case '9':
-                userValue = userValue * 10 + c - '0';
-                break;
-            case '*':
-            case '/':
-            case 'i':
-            case '+':
-            case '-':
-            case 'p':
-            case 'r':
-            case 's':
-            case 'w':
-            case 'l':
-            case 'h':
-            case '?':
-                userCommand = c;
-                break;
-            case '\n':
-                executeCommand();
-                break;
-            default:
-                break;
-        }
+        if(serialBaudrateIndex)
+            serialBaudrateIndex -=1;
     }
+    menu.printVariable(dpeek(serialBaudrate + serialBaudrateIndex));
+    menu.print_P(unitBaud);
 }
 
-float getRate()
-{
-    return tachy.getRate();
-}
-
-void ledCommand(byte led_num, unsigned long int _color)
-{
-    rgbLeds.setPixelColor(led_num, _color);
-    rgbLeds.show();
-}
-
-void editPulsesPerRotate(byte direction)
+void editSpeedSwitch(byte direction)
 {
     if(direction == MENU_BROWSER_DATA_INCREASE)
-        tachy.setPulsePerRotate(tachy.getPulsePerRotate() + 1.0);
+        speedSwitch = true;
     else if(direction == MENU_BROWSER_DATA_DECREASE)
-        tachy.setPulsePerRotate(tachy.getPulsePerRotate() - 1.0);
-    menu.printVariable((int)tachy.getPulsePerRotate());
+        speedSwitch = false;
+    printExportFlag(speedSwitch);
 }
 
-void editMeasurementWindow(byte direction)
+void editCloggingSwitch(byte direction)
 {
     if(direction == MENU_BROWSER_DATA_INCREASE)
-        tachy.setMeasurementWindow(tachy.getMeasurementWindow() + 1.0);
+        cloggingSwitch = true;
     else if(direction == MENU_BROWSER_DATA_DECREASE)
-        tachy.setMeasurementWindow(tachy.getMeasurementWindow() - 1.0);
-    menu.printVariable(tachy.getMeasurementWindow());
+        cloggingSwitch = false;
+    printExportFlag(cloggingSwitch);
 }
 
-void editMinSpeed(byte direction)
-{
-    if(direction == MENU_BROWSER_DATA_INCREASE)
-        tachy.setMin(tachy.getMin() + 1.0);
-    else if(direction == MENU_BROWSER_DATA_DECREASE)
-        tachy.setMin(tachy.getMin() - 1.0);
-    menu.printVariable(tachy.getMin());
-}
-
-void editMaxSpeed(byte direction)
-{
-    if(direction == MENU_BROWSER_DATA_INCREASE)
-        tachy.setMax(tachy.getMax() + 1.0);
-    else if(direction == MENU_BROWSER_DATA_DECREASE)
-        tachy.setMax(tachy.getMax() - 1.0);
-    menu.printVariable(tachy.getMax());
-}
+/*******************************/
+/* regular Arduino's functions */
+/*******************************/
 
 void setup()
 {
-    console.begin(9600);
-    println_P(title);
-    println_P(timestamp);
-
     tachy.begin();
     readConfig();
 
@@ -424,14 +371,12 @@ void setup()
     k2000.setLedCommand(&ledCommand);
     k2000.setGetRate(&getRate);
     
-    menu.begin(MENU_BROWSER_NB_ENTRIES, MENU_DATA_tables);
+    menu.begin(MENU_BROWSER_NB_ENTRIES, MENU_DATA_tables, &display, &encoder);
 }
 
 void loop()
 {
     tachy.sequencer();
-    userSequencer();
-    ihmSequencer();
     k2000.sequencer();
     menu.sequencer();
     

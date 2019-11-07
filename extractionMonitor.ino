@@ -27,7 +27,10 @@
 #define EEPROM_ADDR_DURATION_MAX (EEPROM_ADDR_DURATION_MIN + sizeof(float))
 #define EEPROM_ADDR_LUMINOSITY (EEPROM_ADDR_DURATION_MAX + sizeof(float))
 #define EEPROM_ADDR_DIRECTION (EEPROM_ADDR_LUMINOSITY + sizeof(byte))
-#define EEPROM_DATASIZE (EEPROM_ADDR_DIRECTION + sizeof(bool))
+#define EEPROM_ADDR_BAUDRATE (EEPROM_ADDR_DIRECTION + sizeof(byte))
+#define EEPROM_ADDR_EXPORT_SWITCH (EEPROM_ADDR_BAUDRATE + sizeof(byte))
+#define EEPROM_ADDR_CLOGGING_SWITCH (EEPROM_ADDR_EXPORT_SWITCH + sizeof(bool))
+#define EEPROM_DATASIZE (EEPROM_ADDR_CLOGGING_SWITCH + sizeof(bool))
 
 #define ERR_NOT_IMPLEMENTED_YET 1
 
@@ -54,7 +57,7 @@ MENU_ENCODER encoder = MENU_ENCODER(5, 6, 7);
 LiquidCrystal_I2C display(0x27, 20, 4);
 ARDUINO_MENU menu = ARDUINO_MENU();
 
-const char PROGMEM appVersion[] = TACHY_VERSION;
+const char PROGMEM appVersion[] = "1.01";
 const char PROGMEM compilationTimestamp[] = __DATE__ " " __TIME__;
 const char PROGMEM unitSecond[] = " sec";
 const char PROGMEM unitRpm[] = " tr/min";
@@ -64,6 +67,7 @@ const char PROGMEM unitBaud[] = " baud";
 
 const long serialBaudrate[] PROGMEM = 
 {
+    0,
     9600,
     19200,
     38400,
@@ -73,10 +77,12 @@ const long serialBaudrate[] PROGMEM =
 };
 #define NB_BAUDRATES (sizeof(serialBaudrate) / sizeof(long))
 
-bool serialOutputSwitch = true;
-byte serialBaudrateIndex = 0;
+byte serialBaudrateIndex = 1; // 9600 bauds
 bool speedSwitch = true; 
 bool cloggingSwitch = true; 
+
+long unsigned int EXPORTER_milestone;
+long unsigned int EXPORTER_runningState;
 
 /*************/
 /* callbacks */
@@ -283,6 +289,7 @@ byte readConfig()
     float dmin;
     float dmax;
     bool direction;
+    
     EEPROM.get(EEPROM_ADDR_MIN, min);
     EEPROM.get(EEPROM_ADDR_MAX, max);
     EEPROM.get(EEPROM_ADDR_PULSE_PER_ROTATE, ppr);
@@ -290,6 +297,12 @@ byte readConfig()
     EEPROM.get(EEPROM_ADDR_DURATION_MIN, dmin);
     EEPROM.get(EEPROM_ADDR_DURATION_MAX, dmax);
     EEPROM.get(EEPROM_ADDR_DIRECTION, direction);
+    EEPROM.get(EEPROM_ADDR_BAUDRATE, serialBaudrateIndex);
+    if(serialBaudrateIndex >= NB_BAUDRATES)
+        serialBaudrateIndex = 1; // 96000 bauds
+    EEPROM.get(EEPROM_ADDR_EXPORT_SWITCH, speedSwitch);
+    EEPROM.get(EEPROM_ADDR_CLOGGING_SWITCH, cloggingSwitch);
+    
     tachy.setMin(min);
     tachy.setMax(max);
     tachy.setPulsePerRotate(ppr);
@@ -297,6 +310,8 @@ byte readConfig()
     k2000.setDurationMin(dmin);
     k2000.setDurationMax(dmax);
     k2000.setDirection(direction);
+    EXPORTER_setBaudRate();
+    
     return 0;
 }
 
@@ -309,6 +324,10 @@ byte storeConfig()
     EEPROM.put(EEPROM_ADDR_DURATION_MIN, k2000.getDurationMin());
     EEPROM.put(EEPROM_ADDR_DURATION_MAX, k2000.getDurationMax());
     EEPROM.put(EEPROM_ADDR_DIRECTION, k2000.getDirection());
+    EEPROM.put(EEPROM_ADDR_BAUDRATE, serialBaudrateIndex);
+    EEPROM.put(EEPROM_ADDR_EXPORT_SWITCH, speedSwitch);
+    EEPROM.put(EEPROM_ADDR_CLOGGING_SWITCH, cloggingSwitch);
+    
     return 0;
 }
 
@@ -316,15 +335,6 @@ byte factory()
 {
     return ERR_NOT_IMPLEMENTED_YET;
 }
-void editSerialOutputSwitch(byte direction)
-{
-    if(direction == MENU_BROWSER_DATA_INCREASE)
-        serialOutputSwitch  = true;
-    else if(direction == MENU_BROWSER_DATA_DECREASE)
-        serialOutputSwitch = false;
-    printActiveFlag(serialOutputSwitch);
-}
-
 void editSerialBaudrate(byte direction)
 {
     if(direction == MENU_BROWSER_DATA_INCREASE)
@@ -337,8 +347,15 @@ void editSerialBaudrate(byte direction)
         if(serialBaudrateIndex)
             serialBaudrateIndex -=1;
     }
-    menu.printVariable(dpeek(serialBaudrate + serialBaudrateIndex));
-    menu.print_P(unitBaud);
+    if (serialBaudrateIndex)
+    {
+        menu.printVariable(dpeek(serialBaudrate + serialBaudrateIndex));
+        menu.print_P(unitBaud);
+    }
+    else
+        printExportFlag(false);
+    if(direction != MENU_BROWSER_DATA_JUST_DISPLAY)
+        EXPORTER_setBaudRate();
 }
 
 void editSpeedSwitch(byte direction)
@@ -372,6 +389,62 @@ void editDirection(byte direction)
         menu.printVariable(F("sens anti-horaire"));
 }
 
+void editCurrentPulsePerTurn(byte direction)
+{
+    if(direction){};
+    menu.printVariable((long)tachy.getPulsePerRotate());
+}
+
+/**********************/
+/* exportation module */
+/**********************/
+
+void EXPORTER_setBaudRate()
+{
+    Serial.flush();
+    switch(serialBaudrateIndex)
+    {
+        case 1: // 9600
+            Serial.begin(9600);
+            break;
+        case 2: // 19200
+            Serial.begin(19200);
+            break;
+        case 3: // 38400,
+            Serial.begin(38400);
+            break;
+        case 4: // 57600
+            Serial.begin(57600);
+            break;
+        case 5: // 74880
+            Serial.begin(74880);
+            break;
+        case 6: // 115200
+            Serial.begin(115200);
+        default:
+            break;
+    }
+}
+void EXPORTER_sequencer()
+{
+    if(serialBaudrateIndex)
+        if(millis() >= EXPORTER_milestone)
+        {
+            EXPORTER_milestone += tachy.getMeasurementWindow() * 1000;
+            if(speedSwitch)
+            {
+                Serial.print(tachy.getSpeed());
+                Serial.write('\t');
+            }
+            if(speedSwitch)
+            {
+                Serial.print(tachy.getRate());
+                Serial.write('\t');
+            }
+            Serial.write('\n');
+        }
+}
+
 /*******************************/
 /* regular Arduino's functions */
 /*******************************/
@@ -389,6 +462,8 @@ void setup()
     k2000.setLedCommand(&ledCommand);
     k2000.setGetRate(&getRate);
     
+    EXPORTER_setBaudRate();
+    
     menu.begin(MENU_BROWSER_NB_ENTRIES, MENU_DATA_tables, &display, &encoder);
 }
 
@@ -397,6 +472,7 @@ void loop()
     tachy.sequencer();
     k2000.sequencer();
     menu.sequencer();
+    EXPORTER_sequencer();
     
     if(millis() & 0x200)
         digitalWrite(LED_BUILTIN, 0);

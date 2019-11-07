@@ -1,7 +1,7 @@
 /*
  * file : debug.txt
  * Copyright (c) pfeuh <ze.pfeuh@gmail.com>
- * creation date : 2019/11/07 10:36:46
+ * creation date : 2019/11/07 13:45:06
  * All rights reserved.
  * 
  * This program is free software: you can redistribute it and/or modify
@@ -25,39 +25,41 @@
 /*        by the next generation!           */
 /********************************************/
 
-IDX LABEL                                 PARENT   CHILD    NEXT    PREVIOUS
-----------------------------------------------------------------------------
-  0 MONITEUR                              ---        1        9     ---
-  1     Vitesse                             0      ---        2     ---
-  2     Colmatage                           0      ---        3       1
-  3     Cycle mesure                        0      ---        4       2
-  4     Min                                 0      ---        5       3
-  5     Max                                 0      ---        6       4
-  6     Luminosite                          0      ---        7       5
-  7     Duree min du pas                    0      ---        8       6
-  8     Duree max du pas                    0      ---      ---       7
-  9 MODULES                               ---       10       29       0
- 10     TACHY                               9       11       13     ---
- 11         Impulsions/tour                10      ---       12     ---
- 12         Cycle mesure                   10      ---      ---      11
- 13     K2000                               9       14       20      10
- 14         Direction                      13      ---       15     ---
- 15         Colmatage min                  13      ---       16      14
- 16         Colmatage max                  13      ---       17      15
- 17         Luminosite LED                 13      ---       18      16
- 18         Duree min du pas               13      ---       19      17
- 19         Duree max du pas               13      ---      ---      18
- 20     MEMOIRE                             9       21       24      13
- 21         Sauver config.                 20      ---       22     ---
- 22         Charger config.                20      ---       23      21
- 23         Config. usine                  20      ---      ---      22
- 24     EXPORT                              9       25      ---      20
- 25         Exportation                    24      ---       26     ---
- 26         Debit                          24      ---       27      25
- 27         Vitesse ventilat.              24      ---       28      26
- 28         Taux de bouchage               24      ---      ---      27
- 29 SYSTEME                               ---       30      ---       9
- 30     Etalonner min                      29      ---       31     ---
- 31     Etalonner max                      29      ---       32      30
- 32     Version de l'app.                  29      ---       33      31
- 33     Date compilation                   29      ---      ---      32
+IDX LABEL                                PARENT   CHILD    NEXT    PREVIOUS
+---------------------------------------------------------------------------
+  0 MONITEUR                             ---        1       10     ---
+  1     Vitesse                            0      ---        2     ---
+  2     Cycle mesure                       0      ---        3       1
+  3     Impulsions/tour                    0      ---        4       2
+  4     Colmatage                          0      ---        5       3
+  5     Colmatage min                      0      ---        6       4
+  6     Colmatage max                      0      ---        7       5
+  7     Luminosite                         0      ---        8       6
+  8     Duree min du pas                   0      ---        9       7
+  9     Duree max du pas                   0      ---      ---       8
+ 10 MODULES                              ---       11       29       0
+ 11     TACHY                             10       12       14     ---
+ 12         Impulsions/tour               11      ---       13     ---
+ 13         Cycle mesure                  11      ---      ---      12
+ 14     K2000                             10       15       21      11
+ 15         Direction                     14      ---       16     ---
+ 16         Colmatage min                 14      ---       17      15
+ 17         Colmatage max                 14      ---       18      16
+ 18         Luminosite LED                14      ---       19      17
+ 19         Duree min du pas              14      ---       20      18
+ 20         Duree max du pas              14      ---      ---      19
+ 21     MEMOIRE                           10       22       25      14
+ 22         Sauver config.                21      ---       23     ---
+ 23         Charger config.               21      ---       24      22
+ 24         Config. usine                 21      ---      ---      23
+ 25     EXPORT                            10       26      ---      21
+ 26         Debit serial                  25      ---       27     ---
+ 27         Vitesse                       25      ---       28      26
+ 28         Colmatage                     25      ---      ---      27
+ 29 SYSTEME                              ---       30      ---      10
+ 30     COLMATAGE                         29       31       33     ---
+ 31         Etalonner min                 30      ---       32     ---
+ 32         Etalonner max                 30      ---      ---      31
+ 33     APPLICATION                       29       34      ---      30
+ 34         Version                       33      ---       35     ---
+ 35         Date compilation              33      ---      ---      34

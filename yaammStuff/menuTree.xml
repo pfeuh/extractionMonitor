@@ -3,10 +3,11 @@
     <rootTitle label="EXTRACTION's MONITOR"/>
     <menu cname="monitor" label="MONITEUR">
 	    <variable cname="currentSpeed" label="Vitesse"  living="1" />
-	    <variable cname="currentClogging" label="Colmatage" living="1" />
 	    <variable cname="currentWindowWidth" label="Cycle mesure" readonly="1" />
-	    <variable cname="currentMin" label="Min"  readonly="1" />
-	    <variable cname="currentMax" label="Max"  readonly="1" />
+	    <variable cname="currentPulsePerTurn" label="Impulsions/tour" readonly="1" />
+	    <variable cname="currentClogging" label="Colmatage" living="1" />
+	    <variable cname="currentMin" label="Colmatage min"  readonly="1" />
+	    <variable cname="currentMax" label="Colmatage max"  readonly="1" />
         <variable cname="currentLuminosity" label="Luminosite" readonly="1" />
         <variable cname="currentDurationMin" label="Duree min du pas" readonly="1" />
         <variable cname="currentDurationMax" label="Duree max du pas" readonly="1" />
@@ -26,7 +27,7 @@
         </menu><!--
         <menu cname="display" label="ECRAN">
             <variable cname="viewSpeed" label="Vitesse ventilat." />
-            <variable cname="viewClogging" label="Taux de bouchage" />
+            <variable cname="viewClogging" label="Taux de colmatage" />
             <variable cname="viewMinMax" label="Voir min-max" />
         </menu>-->
         <menu cname="storage" label="MEMOIRE">
@@ -35,16 +36,20 @@
             <function cname="factory" label="Config. usine" />
         </menu>
         <menu cname="export" label="EXPORT">
-            <variable cname="serialOutputSwitch" label="Exportation" />
-            <variable cname="serialBaudrate" label="Debit" />
-            <variable cname="speedSwitch" label="Vitesse ventilat." />
-            <variable cname="cloggingSwitch" label="Taux de bouchage" />
+            <!--<variable cname="serialOutputSwitch" label="Exportation" />-->
+            <variable cname="serialBaudrate" label="Debit serial" />
+            <variable cname="speedSwitch" label="Vitesse" />
+            <variable cname="cloggingSwitch" label="Colmatage" />
         </menu>
     </menu>
     <menu cname="maintenance" label="SYSTEME">
-	    <function cname="calibMin" label="Etalonner min" />
-	    <function cname="calibMax" label="Etalonner max" />
-	    <variable cname="version" label="Version de l'app." readonly="1" />
-	    <variable cname="timestamp" label="Date compilation" readonly="1" /> -->
+        <menu cname="cloggingCalib" label="COLMATAGE">
+            <function cname="calibMin" label="Etalonner min" />
+            <function cname="calibMax" label="Etalonner max" />
+        </menu>
+        <menu cname="appData" label="APPLICATION">
+            <variable cname="version" label="Version" readonly="1" />
+            <variable cname="timestamp" label="Date compilation" readonly="1" />
+        </menu>
     </menu>
 </menuTree>

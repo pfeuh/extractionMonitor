@@ -25,4 +25,5 @@ editSerialBaudrate
 editSpeedSwitch
 editCloggingSwitch
 editDirection
+editCurrentPulsePerTurn
 

@@ -43,6 +43,8 @@ class K2000
         void setGetRate(float(*callback)());
         void setLuminosity(byte value);
         byte getLuminosity();
+        void setDirection(byte direction);
+        bool getDirection();
 
     private:
         void(*ledCommand)(byte led_num, unsigned long int _color);
@@ -52,6 +54,7 @@ class K2000
         float durationMin;
         float durationMax;
         byte luminosity;
+        bool direction;
 
         unsigned long int milestone;
         byte nbLeds;

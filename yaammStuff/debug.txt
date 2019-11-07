@@ -1,7 +1,7 @@
 /*
  * file : debug.txt
  * Copyright (c) pfeuh <ze.pfeuh@gmail.com>
- * creation date : 2019/10/23 14:32:39
+ * creation date : 2019/11/07 10:36:46
  * All rights reserved.
  * 
  * This program is free software: you can redistribute it and/or modify
@@ -29,34 +29,35 @@ IDX LABEL                                 PARENT   CHILD    NEXT    PREVIOUS
 ----------------------------------------------------------------------------
   0 MONITEUR                              ---        1        9     ---
   1     Vitesse                             0      ---        2     ---
-  2     Bouchage                            0      ---        3       1
+  2     Colmatage                           0      ---        3       1
   3     Cycle mesure                        0      ---        4       2
   4     Min                                 0      ---        5       3
   5     Max                                 0      ---        6       4
   6     Luminosite                          0      ---        7       5
   7     Duree min du pas                    0      ---        8       6
   8     Duree max du pas                    0      ---      ---       7
-  9 MODULES                               ---       10       28       0
+  9 MODULES                               ---       10       29       0
  10     TACHY                               9       11       13     ---
  11         Impulsions/tour                10      ---       12     ---
  12         Cycle mesure                   10      ---      ---      11
- 13     K2000                               9       14       19      10
- 14         Vitesse min                    13      ---       15     ---
- 15         Vitesse max                    13      ---       16      14
- 16         Luminosite LED                 13      ---       17      15
- 17         Duree min du pas               13      ---       18      16
- 18         Duree max du pas               13      ---      ---      17
- 19     MEMOIRE                             9       20       23      13
- 20         Sauver config.                 19      ---       21     ---
- 21         Charger config.                19      ---       22      20
- 22         Config. usine                  19      ---      ---      21
- 23     EXPORT                              9       24      ---      19
- 24         Exportation                    23      ---       25     ---
- 25         Debit                          23      ---       26      24
- 26         Vitesse ventilat.              23      ---       27      25
- 27         Taux de bouchage               23      ---      ---      26
- 28 SYSTEME                               ---       29      ---       9
- 29     Etalonner min                      28      ---       30     ---
- 30     Etalonner max                      28      ---       31      29
- 31     Version de l'app.                  28      ---       32      30
- 32     Date compilation                   28      ---      ---      31
+ 13     K2000                               9       14       20      10
+ 14         Direction                      13      ---       15     ---
+ 15         Colmatage min                  13      ---       16      14
+ 16         Colmatage max                  13      ---       17      15
+ 17         Luminosite LED                 13      ---       18      16
+ 18         Duree min du pas               13      ---       19      17
+ 19         Duree max du pas               13      ---      ---      18
+ 20     MEMOIRE                             9       21       24      13
+ 21         Sauver config.                 20      ---       22     ---
+ 22         Charger config.                20      ---       23      21
+ 23         Config. usine                  20      ---      ---      22
+ 24     EXPORT                              9       25      ---      20
+ 25         Exportation                    24      ---       26     ---
+ 26         Debit                          24      ---       27      25
+ 27         Vitesse ventilat.              24      ---       28      26
+ 28         Taux de bouchage               24      ---      ---      27
+ 29 SYSTEME                               ---       30      ---       9
+ 30     Etalonner min                      29      ---       31     ---
+ 31     Etalonner max                      29      ---       32      30
+ 32     Version de l'app.                  29      ---       33      31
+ 33     Date compilation                   29      ---      ---      32

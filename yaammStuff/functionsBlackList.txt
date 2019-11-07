@@ -24,4 +24,5 @@ editSerialOutputSwitch
 editSerialBaudrate
 editSpeedSwitch
 editCloggingSwitch
+editDirection
 

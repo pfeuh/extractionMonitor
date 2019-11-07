@@ -3,7 +3,7 @@
     <rootTitle label="EXTRACTION's MONITOR"/>
     <menu cname="monitor" label="MONITEUR">
 	    <variable cname="currentSpeed" label="Vitesse"  living="1" />
-	    <variable cname="currentClogging" label="Bouchage" living="1" />
+	    <variable cname="currentClogging" label="Colmatage" living="1" />
 	    <variable cname="currentWindowWidth" label="Cycle mesure" readonly="1" />
 	    <variable cname="currentMin" label="Min"  readonly="1" />
 	    <variable cname="currentMax" label="Max"  readonly="1" />
@@ -17,8 +17,9 @@
             <variable cname="measurementWindow" label="Cycle mesure" />
         </menu>
         <menu cname="k2000" label="K2000">
-            <variable cname="minSpeed" label="Vitesse min" />
-            <variable cname="maxSpeed" label="Vitesse max" />        
+            <variable cname="direction" label="Direction" />
+            <variable cname="minSpeed" label="Colmatage min" />
+            <variable cname="maxSpeed" label="Colmatage max" />        
             <variable cname="luminosity" label="Luminosite LED" />
             <variable cname="durationMin" label="Duree min du pas" />
             <variable cname="durationMax" label="Duree max du pas" />

@@ -26,7 +26,8 @@
 #define EEPROM_ADDR_DURATION_MIN (EEPROM_ADDR_MEASUREMENT_WINDOW + sizeof(float))
 #define EEPROM_ADDR_DURATION_MAX (EEPROM_ADDR_DURATION_MIN + sizeof(float))
 #define EEPROM_ADDR_LUMINOSITY (EEPROM_ADDR_DURATION_MAX + sizeof(float))
-#define EEPROM_DATASIZE (EEPROM_ADDR_LUMINOSITY + sizeof(byte))
+#define EEPROM_ADDR_DIRECTION (EEPROM_ADDR_LUMINOSITY + sizeof(byte))
+#define EEPROM_DATASIZE (EEPROM_ADDR_DIRECTION + sizeof(bool))
 
 #define ERR_NOT_IMPLEMENTED_YET 1
 
@@ -281,18 +282,21 @@ byte readConfig()
     byte measurementWindow;
     float dmin;
     float dmax;
+    bool direction;
     EEPROM.get(EEPROM_ADDR_MIN, min);
     EEPROM.get(EEPROM_ADDR_MAX, max);
     EEPROM.get(EEPROM_ADDR_PULSE_PER_ROTATE, ppr);
     EEPROM.get(EEPROM_ADDR_MEASUREMENT_WINDOW, measurementWindow);
     EEPROM.get(EEPROM_ADDR_DURATION_MIN, dmin);
     EEPROM.get(EEPROM_ADDR_DURATION_MAX, dmax);
+    EEPROM.get(EEPROM_ADDR_DIRECTION, direction);
     tachy.setMin(min);
     tachy.setMax(max);
     tachy.setPulsePerRotate(ppr);
     tachy.setMeasurementWindow(measurementWindow);
     k2000.setDurationMin(dmin);
     k2000.setDurationMax(dmax);
+    k2000.setDirection(direction);
     return 0;
 }
 
@@ -304,6 +308,7 @@ byte storeConfig()
     EEPROM.put(EEPROM_ADDR_MEASUREMENT_WINDOW, tachy.getMeasurementWindow());
     EEPROM.put(EEPROM_ADDR_DURATION_MIN, k2000.getDurationMin());
     EEPROM.put(EEPROM_ADDR_DURATION_MAX, k2000.getDurationMax());
+    EEPROM.put(EEPROM_ADDR_DIRECTION, k2000.getDirection());
     return 0;
 }
 
@@ -352,6 +357,19 @@ void editCloggingSwitch(byte direction)
     else if(direction == MENU_BROWSER_DATA_DECREASE)
         cloggingSwitch = false;
     printExportFlag(cloggingSwitch);
+}
+
+void editDirection(byte direction)
+{
+    // Warning! "direction" parameter is for increase/decrease
+    if(direction == MENU_BROWSER_DATA_INCREASE)
+        k2000.setDirection(true);
+    else if(direction == MENU_BROWSER_DATA_DECREASE)
+        k2000.setDirection(false);
+    if(k2000.getDirection())
+        menu.printVariable(F("sens horaire"));
+    else
+        menu.printVariable(F("sens anti-horaire"));
 }
 
 /*******************************/

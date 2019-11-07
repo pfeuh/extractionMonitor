@@ -1,7 +1,7 @@
 /*
  * file : sharedFunctions.h
  * Copyright (c) pfeuh <ze.pfeuh@gmail.com>
- * creation date : 2019/10/23 14:32:39
+ * creation date : 2019/11/07 10:36:46
  * All rights reserved.
  * 
  * This program is free software: you can redistribute it and/or modify
@@ -44,6 +44,8 @@
 // Function editPulsesPerRotate is black listed.
 
 // Function editMeasurementWindow is black listed.
+
+// Function editDirection is black listed.
 
 // Function editMinSpeed is black listed.
 

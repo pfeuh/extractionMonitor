@@ -54,9 +54,13 @@ void K2000::sequencer()
             milestone += duration;
             // k2000 is designed for this job...
             ledCommand(ledIndex, 0);
-            ++ledIndex %= nbLeds;
+            if(direction)
+                ++ledIndex %= nbLeds;
+            else
+                --ledIndex %= nbLeds;
             word temp_red = (luminosity * rate) / 100;
             word temp_green = luminosity - temp_red;
+            
             word color = temp_red + (temp_green << 8);
             ledCommand(ledIndex, color);
         }
@@ -101,5 +105,15 @@ void K2000::setLuminosity(byte value)
 byte K2000::getLuminosity()
 {
     return luminosity;
+}
+
+void K2000::setDirection(byte _direction)
+{
+    direction = _direction;
+}
+
+bool K2000::getDirection()
+{
+    return direction;
 }
 
